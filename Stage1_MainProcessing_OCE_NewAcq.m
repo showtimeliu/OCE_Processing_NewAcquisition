@@ -61,6 +61,7 @@ for nSet = 1 % 21 : 50  %length(listRoot)
     
     
     % controling parameters
+    bMATLABInterp = true; 
     bRef = 0;                % reference file: 1; no reference file: 0 
     pnNumbers = 51; %1 : 100; % numel(listData);
     
@@ -81,32 +82,19 @@ for nSet = 1 % 21 : 50  %length(listRoot)
         [pdIMAQ, ~] = readData(strReference, cellArrays); 
         pdRef = mean(pdIMAQ, 2);
     
-    %     % calculate noise level
-    %     pdSpectrum = pdIMAQ - repmat(pdRef, [1, size(pdIMAQ, 2)]); 
-    % %     pdSpectrum = correctSpectrum(pdSpectrum, cellArrays);
-    %     clear pdIMAQ; 
-    %     
-    %     nMidLength = size(pdSpectrum, 1) / 2 + 1;
-    %     pdFFT = fft(pdSpectrum);
-    %     pdZPFFT = zeros([nZPPaddingFactor*size(pdSpectrum, 1), size(pdSpectrum, 2)]);
-    %     pdFFT(nMidLength, :) = 0.5 * pdFFT(nMidLength, :);
-    %     pdZPFFT(1:nMidLength, :) = pdFFT(1:nMidLength, :);
-    %     pdZPFFT(end-nMidLength+2:end, :) = pdFFT(end-nMidLength+2:end, :);
-    %     pdZPSpectrum = real(ifft(pdZPFFT)) * nZPPaddingFactor;
-    %     clear nMidLength pdFFT pdZPFFT; 
-    % 
-    %     pnIndex = 2 * (0 : size(pdSpectrum, 1)-1);
-    %     pdInterpolated = interp1(pdCalibrationZPPoint, pdZPSpectrum, pnIndex);
-    %     pdCorrected = pdInterpolated .* repmat(pdDispersion', [1, size(pdInterpolated, 2)]);
-    % 
-    %     pdDepthProfiles = fft(pdCorrected);
-    %     clear pdSpectrum pdZPSpectrum pnIndex pdInterpolated pdCorrected;
-    %     pdDepthProfiles(size(pdDepthProfiles, 1)/2:end, :) = [];
-    % 
-    % %     pdRefDepthProfiles = pdDepthProfiles; 
-    %     pdNoise = mean(abs(pdDepthProfiles), 2);
-    % 
-    %     clear pdDepthProfiles;
+%         % calculate noise level
+%         pdRefSpectrum = pdIMAQ - repmat(pdRef, [1, size(pdIMAQ, 2)]); 
+%         clear pdIMAQ; 
+%         
+%         pdRefCalibrated = applyCalibration(pdRefSpectrum, pdK, pnIndex, bMATLABInterp);
+%         pcdRefCorrected = applyDispersion(pdRefCalibrated, pdDispReal, pdDispImag);
+%         pcdRefDepthProfiles = getComplexDepthProfile(pcdRefCorrected, pdMask);
+%         pcdRefDepthProfiles(round(nLineLength/2) + 1:end, : ) = []; 
+%         clear pdRefCalibrated pcdRefCorrected; 
+% 
+%         pdNoise = mean(abs(pcdRefDepthProfiles) .^ 2, 2);
+% 
+%         clear pcdRefDepthProfiles;
     
     else 
         disp('calculating reference...');
@@ -170,22 +158,19 @@ for nSet = 1 % 21 : 50  %length(listRoot)
         % subtract reference    
         pdIMAQ = pdIMAQ - repmat(pdRef,[1, nNumberLines]);
         
-        % apply calibration    
-        bMATLABInterp = true;    
+        % apply calibration   
         pdIMAQCalibrated = applyCalibration(pdIMAQ, pdK, pnIndex, bMATLABInterp);
         % clear pdIMAQ pdK pnIndex
         
         % apply dispersion
         pcdIMAQCorrected = applyDispersion(pdIMAQCalibrated, pdDispReal, pdDispImag);
         
-        % get complex depth profile
-        
+        % get complex depth profile        
         pcdDepthProfiles = getComplexDepthProfile(pcdIMAQCorrected, pdMask);
-        
-        % intensity image
-        
+        pcdDepthProfiles(round(nLineLength/2) + 1:end, : ) = []; 
+
+        % intensity image        
         pdI = abs(pcdDepthProfiles) .^ 2; 
-        pdI(round(nLineLength/2) + 1:end, : ) = []; 
         pddB = 10* log10(pdI); 
     
         %% processing: surface
