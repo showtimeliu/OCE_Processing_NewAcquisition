@@ -18,12 +18,12 @@ fE = figure('Position',[nLeft+1*nWidth/nX nBottom+0*nHeight/2 nWidth/nX-nRight n
 fF = figure('Position',[nLeft+2*nWidth/nX nBottom+0*nHeight/2 nWidth/nX-nRight nHeight/nY-nTop]);
 clear scrsz nY nBottom nTop nX nLeft nRight nHeight nWidth;
 
-for nSet = 1 % 21 : 50  %length(listRoot)
+for nSet = 22 % 21 : 50  %length(listRoot)
     
     
     % data directories
     
-    strDir = ['D:\Raw data\OCE and Scaffold\20220128 PDMS phantom test\Phantom_test_', num2str(nSet), '\']; 
+    strDir = ['C:\Users\NOIR_\Desktop\Jason\20220203 PDMS phantom test\Phantom_test_', num2str(nSet), '\']; 
     % strSaveMat = ['D:\Processed data\OCE and Scaffold\20220127 PDMS Phantom\', str];
     % strSaveFig = ['D:\Processed data\OCE and Scaffold\20220127 PDMS Phantom\', str, 'figures\'];
     % mkdir(strSaveMat); mkdir(strSaveFig); 
@@ -193,6 +193,13 @@ for nSet = 1 % 21 : 50  %length(listRoot)
         pddBDiff = abs(pddBEven - pddBOdd);    
         pdDeltaZ = (1e6) * sqrt((4 / dK^2) * (1 - 10.^(-pddBDiff / 10)));
 
+%         figure, [~, nROI] = imcrop(rescale(pdDeltaZ(1:1024, :))); 
+%         pnX = round(nROI(1)) : round(nROI(1) + nROI(3)); 
+%         pnY = round(nROI(2)) : round(nROI(2) + nROI(4)); 
+% 
+%         ddBDiff = mean(mean(pddBDiff(pnY, pnX))); 
+%         dDeltaZ = mean(mean(pdDeltaZ(pnY, pnX))); 
+
 
         %% processing: attenuation
     
@@ -210,15 +217,17 @@ for nSet = 1 % 21 : 50  %length(listRoot)
         xlim([1, 1024]); ylim([50, 100]);
     
         figure(fB); 
-        imagesc(pddBDiff(1:1024, :), [0, 10]); colormap(jet); colorbar; 
+        imagesc(pddBDiff, [0, 10]); colormap(jet); colorbar; 
         hold on; plot(pnSurface(1:2:end), 'y', 'LineWidth', 2); hold off; 
-        title(strName, 'interpreter', 'none'); 
+%         hold on; rectangle('Position', nROI, 'EdgeColor', 'k', 'LineWidth', 2); hold off; 
+%         title(sprintf('%s, dB diff = %0.2f', strName, ddBDiff), 'interpreter', 'none'); 
 %         saveas(gcf, sprintf('%sOCE_%d_%s.png', strSaveFig, 100000 + nNumber, strName), 'png');
         
         figure(fC); 
-        imagesc(pdDeltaZ(1:1024, :), [dContrastMin, dContrastMax]); colormap(jet); colorbar; 
+        imagesc(pdDeltaZ, [dContrastMin, dContrastMax]); colormap(jet); colorbar; 
         hold on; plot(pnSurface(1:2:end), 'y', 'LineWidth', 2); hold off; 
-        title(strName, 'interpreter', 'none'); 
+%         hold on; rectangle('Position', nROI, 'EdgeColor', 'k', 'LineWidth', 2); hold off; 
+%         title(sprintf('%s, del_z = %0.2f', strName, dDeltaZ), 'interpreter', 'none'); 
 %         saveas(gcf, sprintf('%sDeltaZ_%d_%s.png', strSaveFig, 100000 + nNumber, strName), 'png');
     
 %         save(sprintf('%s%d_%s.mat', strSaveMat, 100000 + nNumber, strName), 'pdDepthProfiles', 'pddB', 'pddBDiff', 'pnSurface', 'pdDeltaZ'); 
